@@ -1,0 +1,49 @@
+---
+title: "Homework1"
+author: "Li Jiang"
+date: "2025-02-22"
+output: html_document
+---
+
+```{r}
+#load packages
+library(readr)
+library(glmnet)
+library(tidyr)
+library(janitor)
+library(corrplot)
+```
+
+```{r}
+#Data import
+train_data <- read.csv("housing_training.csv") %>%
+  clean_names()
+test_data <- read.csv("housing_test.csv") %>%
+  clean_names()
+```
+
+```{r}
+#Building matrix of predictors and responses
+x <- model.matrix(sale_price ~ .,train_data)[,-1]
+y <- train_data[, "sale_price"]
+
+correlation <- corrplot(cor(x),method = "circle",type = "full")
+
+```
+
+```{r}
+#fit the ridge regression (alpha = 0) with a sequence of lambas
+ridge.mod <- glmnet( x = x, y=y,
+                     alpha=0,
+                     lambda = exp(seq(10,-5,length = 100)))
+```
+
+```{r}
+#building lasso model
+cv.lasso <- cv.glmnet(x,y,
+                      alpha =1,
+                      lambda = exp(seq(6,-5,length = 100)))
+cv.lasso$lambda.min
+plot(cv.lasso)
+```
+
